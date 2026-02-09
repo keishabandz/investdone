@@ -80,7 +80,7 @@ export class StockAPI {
     );
 
     const payload = response.data;
-    const rows = Array.isArray(payload)
+    const rows: Record<string, unknown>[] = Array.isArray(payload)
       ? payload
       : Array.isArray(payload?.historical)
       ? payload.historical
@@ -109,7 +109,7 @@ export class StockAPI {
       throw new Error(`No historical data found for symbol: ${symbol}`);
     }
 
-    const historical = rows
+    const historical: HistoricalPrice[] = rows
       .map((item: Record<string, unknown>) => ({
         date: item.date as string,
         open: Number(item.open) || Number(item.price) || 0,
