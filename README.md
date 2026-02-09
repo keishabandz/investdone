@@ -41,6 +41,7 @@ cp .env.example .env.local
 Required keys:
 - **Supabase:** Get from [supabase.com](https://supabase.com) (Project Settings > API)
 - **Financial Modeling Prep:** Get from [financialmodelingprep.com](https://financialmodelingprep.com/developer/docs/)
+- **OpenAI (optional):** Set `OPEN_AI_API_KEY` for AI coaching insights in stock analysis
 
 ### 3. Set up Supabase database
 

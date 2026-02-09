@@ -16,8 +16,16 @@ interface AnalysisData {
   metrics: Record<string, number> | null;
 }
 
+interface AIExplainData {
+  headline?: string;
+  summary?: string;
+  nextStep?: string;
+}
+
 export default function AIInsights({ symbol }: AIInsightsProps) {
   const [data, setData] = useState<AnalysisData | null>(null);
+  const [explain, setExplain] = useState<AIExplainData | null>(null);
+  const [explainLoading, setExplainLoading] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -36,6 +44,32 @@ export default function AIInsights({ symbol }: AIInsightsProps) {
 
     fetchAnalysis();
   }, [symbol]);
+
+  useEffect(() => {
+    async function fetchExplain() {
+      if (!data?.scores) return;
+
+      setExplainLoading(true);
+      try {
+        const res = await fetch("/api/ai/explain", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ symbol, scores: data.scores }),
+        });
+
+        if (!res.ok) return;
+
+        const result = await res.json();
+        setExplain(result);
+      } catch (error) {
+        console.error("AI explain error:", error);
+      } finally {
+        setExplainLoading(false);
+      }
+    }
+
+    fetchExplain();
+  }, [data, symbol]);
 
   if (loading) {
     return (
@@ -101,6 +135,30 @@ export default function AIInsights({ symbol }: AIInsightsProps) {
               : "Price momentum is weak, indicating potential headwinds or consolidation."}
           </p>
         </div>
+      </Card>
+
+      <Card className="p-6">
+        <h3 className="font-semibold text-lg mb-3">AI Learning Coach</h3>
+        {explainLoading ? (
+          <p className="text-sm text-gray-500">Generating AI guidance...</p>
+        ) : explain?.summary ? (
+          <div className="space-y-2 text-sm text-gray-700">
+            {explain.headline ? (
+              <p className="font-semibold text-gray-900">{explain.headline}</p>
+            ) : null}
+            <p>{explain.summary}</p>
+            {explain.nextStep ? (
+              <p>
+                <strong>Next step:</strong> {explain.nextStep}
+              </p>
+            ) : null}
+          </div>
+        ) : (
+          <p className="text-sm text-gray-500">
+            AI guidance unavailable. Check OPEN_AI_API_KEY in deployment
+            settings.
+          </p>
+        )}
       </Card>
     </div>
   );
