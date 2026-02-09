@@ -50,8 +50,10 @@ export async function GET(
     return NextResponse.json(stockData);
   } catch (error) {
     console.error("API Error:", error);
+    const message =
+      error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
-      { error: "Failed to fetch stock data" },
+      { error: "Failed to fetch stock data", details: message },
       { status: 500 }
     );
   }
