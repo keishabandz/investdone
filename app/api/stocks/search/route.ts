@@ -11,9 +11,11 @@ export async function GET(request: NextRequest) {
     const results = await StockAPI.searchStocks(query);
     return NextResponse.json(results);
   } catch (error) {
-    console.error("Search Error:", error);
+    const message =
+      error instanceof Error ? error.message : "Unknown error";
+    console.error("Search Error:", message);
     return NextResponse.json(
-      { error: "Failed to search stocks" },
+      { error: `Failed to search stocks: ${message}` },
       { status: 500 }
     );
   }
