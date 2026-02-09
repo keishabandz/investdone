@@ -2,6 +2,7 @@ import axios from "axios";
 import { StockData, HistoricalPrice } from "@/types/stock";
 
 const FMP_KEY = process.env.FMP_API_KEY;
+const BASE_URL = "https://financialmodelingprep.com/stable";
 
 export class StockAPI {
   static async getQuote(symbol: string): Promise<StockData> {
@@ -9,7 +10,7 @@ export class StockAPI {
       throw new Error("FMP_API_KEY is not configured");
     }
 
-    const url = `https://financialmodelingprep.com/api/v3/quote/${symbol}?apikey=${FMP_KEY}`;
+    const url = `${BASE_URL}/quote?symbol=${encodeURIComponent(symbol)}&apikey=${FMP_KEY}`;
     const response = await axios.get(url);
 
     if (!Array.isArray(response.data) || !response.data[0]) {
@@ -42,15 +43,17 @@ export class StockAPI {
       throw new Error("FMP_API_KEY is not configured");
     }
 
-    const url = `https://financialmodelingprep.com/api/v3/historical-price-full/${symbol}?apikey=${FMP_KEY}`;
+    const url = `${BASE_URL}/historical-price-eod/full?symbol=${encodeURIComponent(symbol)}&apikey=${FMP_KEY}`;
     const response = await axios.get(url);
 
-    if (!response.data?.historical) {
+    const historical = Array.isArray(response.data) ? response.data : response.data?.historical;
+
+    if (!Array.isArray(historical)) {
       console.error("FMP historical response:", JSON.stringify(response.data));
       throw new Error(`No historical data for symbol: ${symbol}`);
     }
 
-    const historical = response.data.historical
+    return historical
       .slice(0, days)
       .reverse()
       .map((item: Record<string, unknown>) => ({
@@ -61,8 +64,6 @@ export class StockAPI {
         close: item.close as number,
         volume: item.volume as number,
       }));
-
-    return historical;
   }
 
   static async searchStocks(query: string) {
@@ -70,7 +71,7 @@ export class StockAPI {
       throw new Error("FMP_API_KEY is not configured");
     }
 
-    const url = `https://financialmodelingprep.com/api/v3/search?query=${encodeURIComponent(query)}&limit=10&apikey=${FMP_KEY}`;
+    const url = `${BASE_URL}/search-symbol?query=${encodeURIComponent(query)}&limit=10&apikey=${FMP_KEY}`;
     const response = await axios.get(url);
 
     if (!Array.isArray(response.data)) {
@@ -85,10 +86,11 @@ export class StockAPI {
     if (!FMP_KEY) return null;
 
     try {
-      const url = `https://financialmodelingprep.com/api/v3/key-metrics/${symbol}?period=annual&apikey=${FMP_KEY}`;
+      const url = `${BASE_URL}/key-metrics?symbol=${encodeURIComponent(symbol)}&period=annual&apikey=${FMP_KEY}`;
       const response = await axios.get(url);
 
-      const latest = response.data?.[0];
+      const data = Array.isArray(response.data) ? response.data : null;
+      const latest = data?.[0];
       if (!latest) return null;
 
       return {

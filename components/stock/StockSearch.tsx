@@ -10,7 +10,8 @@ interface SearchResult {
   symbol: string;
   name: string;
   currency: string;
-  stockExchange: string;
+  exchangeFullName: string;
+  exchange: string;
 }
 
 export default function StockSearch() {
@@ -81,7 +82,7 @@ export default function StockSearch() {
                   <div className="text-sm text-gray-600">{stock.name}</div>
                 </div>
                 <div className="text-xs text-gray-400">
-                  {stock.stockExchange}
+                  {stock.exchange}
                 </div>
               </div>
             </button>
