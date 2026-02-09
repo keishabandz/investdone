@@ -2,11 +2,13 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Link from "next/link";
 import { BarChart3 } from "lucide-react";
+import { getAppUrl } from "@/lib/env";
 
 export const metadata: Metadata = {
   title: "InvestDone - Investment Forecasting Platform",
   description:
     "Stock analysis and forecasting platform with AI-powered insights",
+  metadataBase: getAppUrl(),
 };
 
 export default function RootLayout({
